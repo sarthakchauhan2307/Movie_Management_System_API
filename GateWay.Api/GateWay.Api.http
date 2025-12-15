@@ -1,0 +1,6 @@
+@GateWay.Api_HostAddress = http://localhost:5063
+
+GET {{GateWay.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

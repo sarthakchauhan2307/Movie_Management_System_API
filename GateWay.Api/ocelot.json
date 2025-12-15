@@ -1,0 +1,103 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/api/user/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/user/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7055
+        }
+      ],
+      "SwaggerKey": "Userservice"
+
+    },
+    {
+      "UpstreamPathTemplate": "/api/booking/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/booking/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7110
+        }
+      ],
+      "SwaggerKey": "Bookingservice"
+
+    },
+    {
+      "UpstreamPathTemplate": "/api/movies/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/movies/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7053
+        }
+      ],
+      "SwaggerKey": "Movieservice"
+    },
+    {
+      "UpstreamPathTemplate": "/api/theatre/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7176
+        }
+      ],
+      "SwaggerKey": "TheatreMasterService"
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "TheatreMasterService",
+      "Config": [
+        {
+          "Name": "TheatreMaster Service API",
+          "Version": "v1",
+          "Url": "https://localhost:7176/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "Bookingservice",
+      "Config": [
+        {
+          "Name": "Booking Service API",
+          "Version": "v1",
+          "Url": "https://localhost:7110/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "Userservice",
+      "Config": [
+        {
+          "Name": "User Service API",
+          "Version": "v1",
+          "Url": "https://localhost:7055/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "Movieservice",
+      "Config": [
+        {
+          "Name": "Movie Service API",
+          "Version": "v1",
+          "Url": "https://localhost:7053/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://localhost:7000"
+  }
+}

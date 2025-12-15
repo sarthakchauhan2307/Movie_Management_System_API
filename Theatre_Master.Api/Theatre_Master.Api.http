@@ -1,0 +1,6 @@
+@Theatre_Master.Api_HostAddress = http://localhost:5186
+
+GET {{Theatre_Master.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
