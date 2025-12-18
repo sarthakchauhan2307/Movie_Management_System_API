@@ -7,7 +7,7 @@ namespace BookingService.Api.Models
         [Key]
         public int BookingId { get; set; }
         [Required]
-        public int UserId { get; set; }   // NO navigation (cross-service)
+        public int UserId { get; set; }  
         [Required]
         public int ShowId { get; set; }
 

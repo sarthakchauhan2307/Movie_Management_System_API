@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UserService.Api.Data;
 using UserService.Api.Model;
+using UserService.Api.Services;
 
 namespace UserService.Api.Controllers
 {
@@ -11,11 +12,11 @@ namespace UserService.Api.Controllers
     public class UserController : ControllerBase
     {
         #region configuration
-        private readonly UserDbContext _context;
+        private readonly IUserService _service;
 
-        public UserController(UserDbContext context)
+        public UserController(IUserService service)
         {
-            _context = context;
+            _service = service;
         }
         #endregion
 
@@ -23,8 +24,7 @@ namespace UserService.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUser()
         {
-            var user = await _context.Users.ToListAsync();
-            return Ok(user);
+           return Ok(await _service.GetUserAsync());
         }
         #endregion
 
@@ -32,23 +32,7 @@ namespace UserService.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(User user)
         {
-            if (user == null)
-            {
-                return BadRequest("User data is null.");
-            }
-            // Check if email already exists
-            var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == user.Email);
-            if (existingUser != null)
-            {
-                return Conflict("A user with this email already exists.");
-            }
-            user.Role = "User";
-            user.Created = DateTime.Now;
-            user.Modified = DateTime.Now;
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            return Ok(user);
+              return Ok( await _service.CreateUserAsync(user));
         }
         #endregion
 
@@ -56,17 +40,7 @@ namespace UserService.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User user)
         {
-            var existingUser = await _context.Users.FindAsync(id);
-            if (existingUser == null)
-            {
-                return NotFound("User not found.");
-            }
-            existingUser.UserName = user.UserName;
-            existingUser.Email = user.Email;
-            existingUser.Modified = DateTime.Now;
-            _context.Users.Update(existingUser);
-            await _context.SaveChangesAsync();
-            return Ok(existingUser);
+            return Ok( await _service.UpdateUserAsync(id, user));
         }
         #endregion
 
@@ -74,15 +48,17 @@ namespace UserService.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var existingUser = await _context.Users.FindAsync(id);
-            if (existingUser == null)
-            {
-                return NotFound("User not found.");
-            }
-            _context.Users.Remove(existingUser);
-            await _context.SaveChangesAsync();
-            return Ok("User deleted successfully.");
+             return Ok( await _service.DeleteUserAsync(id));
+        }
+        #endregion
+
+        #region GetUserById
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            return Ok( await _service.GetUserByIdAsync(id));
         }
         #endregion
     }
 }
+    

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UserService.Api.Data;
+using UserService.Api.Repositories;
+using UserService.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("UserServiceConnection")));
+
+//Adding Repository Dependency Injection
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+//Adding Services DI
+builder.Services.AddScoped<IUserService, UserServices>();
+builder.Services.AddHttpClient<MicroServiceGateway>();
 
 var app = builder.Build();
 
