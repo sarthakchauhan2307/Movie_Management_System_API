@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieService.Api.Data;
 using MovieService.Api.Models;
+using MovieService.Api.Services;
 
 namespace MovieService.Api.Controllers
 {
@@ -11,11 +12,11 @@ namespace MovieService.Api.Controllers
     public class MoviesController : ControllerBase
     {
         #region configuration
-        private readonly MoviesDbContext _context;
+        private readonly IMoviesService _movieservice;
 
-        public MoviesController(MoviesDbContext context)
+        public MoviesController(IMoviesService movieservice)
         {
-            _context = context;
+            _movieservice = movieservice;
         }
         #endregion
 
@@ -23,7 +24,7 @@ namespace MovieService.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMovies()
         {
-            var movies = await _context.Movies.ToListAsync();
+            var movies = await _movieservice.GetMoviesAsync();
             return Ok(movies);
         }
         #endregion
@@ -33,11 +34,7 @@ namespace MovieService.Api.Controllers
         public async Task<IActionResult> AddMovie(Movies movie)
         {
             
-            movie.Created = DateTime.Now;
-            movie.Modified = DateTime.Now;
-            await _context.Movies.AddAsync(movie);
-            await _context.SaveChangesAsync();
-            return Ok(movie);
+          return Ok( await _movieservice.CreateMoviesAsync(movie));
         }
         #endregion
 
@@ -45,18 +42,11 @@ namespace MovieService.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMovie(int id, Movies movie)
         {
-            var existingMovie = await _context.Movies.FindAsync(id);
-            if (existingMovie == null)
-            {
-                return NotFound("Movie not found.");
-            }
-            existingMovie.Title = movie.Title;
-            existingMovie.Genre = movie.Genre;
-            existingMovie.DurationMinutes = movie.DurationMinutes;
-            existingMovie.Modified = DateTime.Now;
-            _context.Movies.Update(existingMovie);
-            await _context.SaveChangesAsync();
-            return Ok(existingMovie);
+            var result = await _movieservice.UpdateMoviesAsync(id, movie);
+            if (!result)
+                return NotFound("Movie not found");
+
+            return Ok("Movie updated successfully");
         }
         #endregion
 
@@ -64,14 +54,15 @@ namespace MovieService.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
-            var existingMovie = await _context.Movies.FindAsync(id);
-            if (existingMovie == null)
+            try
             {
-                return NotFound("Movie not found.");
+                await _movieservice.DeleteMoviesAsync(id);
+                return Ok("Movie deleted successfully");
             }
-            _context.Movies.Remove(existingMovie);
-            await _context.SaveChangesAsync();
-            return Ok("Movie deleted successfully.");
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         #endregion
 
@@ -79,11 +70,9 @@ namespace MovieService.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMovieById(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+           var movie = await _movieservice.GetMoviesByIdAsync(id);
             if (movie == null)
-            {
-                return NotFound();
-            }
+                return NotFound("Movie not found");
             return Ok(movie);
         }
         #endregion

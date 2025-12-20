@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TheatreMaster.Api.Data;
 using TheatreMaster.Api.Models;
+using TheatreMasterService.Api.Service;
 
 namespace TheatreMasterService.Api.Controllers
 {
@@ -12,33 +13,25 @@ namespace TheatreMasterService.Api.Controllers
     public class ScreenController : ControllerBase
     {
         #region configuration
-        private readonly TheatreMasterDbContext _context;
+        private readonly IScreenService _service;
 
-        public ScreenController(TheatreMasterDbContext context)
+        public ScreenController(IScreenService service)
         {
-            _context = context;
+            _service = service;
         }
         #endregion
 
         #region GetScreens
         [HttpGet]
         public async Task<IActionResult> GetScreens()
-        {
-            var screens = await _context.Screens.ToListAsync();
-            return Ok(screens);
-        }
+                  => Ok(await _service.GetScreensAsync());
         #endregion
 
         #region GetScreenById
         [HttpGet("{id}")]
         public async Task<IActionResult> GetScreenById(int id)
         {
-            var screen = await _context.Screens.FindAsync(id);
-            if (screen == null)
-            {
-                return NotFound();
-            }
-            return Ok(screen);
+           return Ok(await _service.GetScreenByIdAsync(id));
         }
         #endregion
 
@@ -46,11 +39,7 @@ namespace TheatreMasterService.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddScreen(Screen screen)
         {
-            screen.Created = DateTime.Now;
-            screen.Modified = DateTime.Now;
-            await _context.Screens.AddAsync(screen);
-            await _context.SaveChangesAsync();
-            return Ok(screen);
+           return Ok( await _service.CreateScreenAsync(screen));
         }
         #endregion
 
@@ -58,17 +47,7 @@ namespace TheatreMasterService.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateScreen(int id, Screen screen)
         {
-            var existingScreen = await _context.Screens.FindAsync(id);
-            if (existingScreen == null)
-            {
-                return NotFound();
-            }
-            existingScreen.ScreenName = screen.ScreenName;
-            existingScreen.ScreenType = screen.ScreenType;
-            existingScreen.Modified = DateTime.Now;
-            _context.Screens.Update(existingScreen);
-            await _context.SaveChangesAsync();
-            return Ok(existingScreen);
+            return Ok( await _service.UpdateScreenAsync(id, screen));
         }
         #endregion
 
@@ -76,14 +55,7 @@ namespace TheatreMasterService.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteScreen(int id)
         {
-            var screen = await _context.Screens.FindAsync(id);
-            if (screen == null)
-            {
-                return NotFound();
-            }
-            _context.Screens.Remove(screen);
-            await _context.SaveChangesAsync();
-            return Ok();
+           return Ok( await _service.DeleteScreenAsync(id));
         }
         #endregion
 

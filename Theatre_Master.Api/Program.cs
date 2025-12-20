@@ -1,5 +1,9 @@
 using TheatreMaster.Api.Data;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
+using TheatreMasterService.Api.Repository;
+using TheatreMasterService.Api.Service;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,6 +15,17 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<TheatreMasterDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TheatreMasterServiceConnection")));
+
+//services registration for repository and service layers goes here
+builder.Services.AddScoped<ITheatreRepository, TheatreRepository>();
+builder.Services.AddScoped<ITheatreService, TheatreService>();
+builder.Services.AddScoped<IScreenRepository, ScreenRepository>();
+builder.Services.AddScoped<IScreenService, ScreenService>();
+builder.Services.AddScoped<IShowRepository, ShowRepository>();
+builder.Services.AddScoped<IShowService, ShowService>();
+
+//adding http client factory for interservice communication
+builder.Services.AddHttpClient<MicroServiceGateway>();
 
 var app = builder.Build();
 

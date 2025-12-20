@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TheatreMaster.Api.Data;
 using TheatreMaster.Api.Models;
+using TheatreMasterService.Api.Service;
 
 namespace TheatreMasterService.Api.Controllers
 {
@@ -11,11 +12,11 @@ namespace TheatreMasterService.Api.Controllers
     public class TheatreController : ControllerBase
     {
         #region configuration
-        private readonly TheatreMasterDbContext _context;
+        private readonly ITheatreService _theatreservice;
 
-        public TheatreController(TheatreMasterDbContext context)
+        public TheatreController(ITheatreService theatreservice)
         {
-            _context = context;
+            _theatreservice = theatreservice;
         }
         #endregion
 
@@ -23,73 +24,31 @@ namespace TheatreMasterService.Api.Controllers
         [HttpGet]
 
         public async Task<IActionResult> GetTheatre()
-        {
-            var theatre = await _context.Theatres.ToListAsync();
-            return Ok(theatre);
-        }
+             => Ok(await _theatreservice.GetTheatresAsync());
         #endregion
-
 
         #region AddTheatre
         [HttpPost]
         public async Task<IActionResult> AddTheatre(Theatre theatre)
-        {
-            theatre.Created = DateTime.Now;
-            theatre.Modified = DateTime.Now;
-            await _context.Theatres.AddAsync(theatre);
-            await _context.SaveChangesAsync();
-            return Ok(theatre);
-        }
+            => Ok(await _theatreservice.CreateTheatreAsync(theatre));
         #endregion
 
         #region GetTheatreById
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTheatreById(int id)
-        {
-            var theatre = await _context.Theatres.FindAsync(id);
-            if (theatre == null)
-            {
-                return NotFound();
-            }
-            return Ok(theatre);
-        }
+             => Ok(await _theatreservice.GetTheatreByIdAsync(id));
         #endregion
 
         #region UpdateTheatre
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTheatre(int id, Theatre theatre)
-        {
-            if (id != theatre.TheatreId)
-            {
-                return BadRequest();
-            }
-            var existingTheatre = await _context.Theatres.FindAsync(id);
-            if (existingTheatre == null)
-            {
-                return NotFound();
-            }
-            existingTheatre.TheatreName = theatre.TheatreName;
-            existingTheatre.City = theatre.City;
-            existingTheatre.Modified = DateTime.Now;
-            _context.Theatres.Update(existingTheatre);
-            await _context.SaveChangesAsync();
-            return Ok(existingTheatre);
-        }
+                => Ok(await _theatreservice.UpdateTheatreAsync(id, theatre));
         #endregion
 
         #region DeleteTheatre
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTheatre(int id)
-        {
-            var theatre = await _context.Theatres.FindAsync(id);
-            if (theatre == null)
-            {
-                return NotFound();
-            }
-            _context.Theatres.Remove(theatre);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+              => Ok(await _theatreservice.DeleteTheatreAsync(id));
         #endregion
 
 
