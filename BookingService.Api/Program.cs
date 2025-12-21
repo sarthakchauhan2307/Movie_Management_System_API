@@ -1,4 +1,6 @@
 using BookingService.Api.Data;
+using BookingService.Api.Repository;
+using BookingService.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,10 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<BookingServiceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BookingServiceConnection")));
+
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IBookingService, BookingServices>();
+builder.Services.AddHttpClient<MicroServiceGateway>();
 
 var app = builder.Build();
 

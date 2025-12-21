@@ -1,5 +1,6 @@
 ﻿using BookingService.Api.Data;
 using BookingService.Api.Models;
+using BookingService.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,11 @@ namespace BookingService.Api.Controllers
     public class BookingController : ControllerBase
     {
         #region configuration
-        private readonly BookingServiceDbContext _context;
+        private readonly IBookingService _service;
 
-        public BookingController(BookingServiceDbContext context)
+        public BookingController(IBookingService service)
         {
-            _context = context;
+            _service = service;
         }
         #endregion
 
@@ -23,7 +24,7 @@ namespace BookingService.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBookings()
         {
-            var bookings = await _context.Bookings.ToListAsync();
+            var bookings = await _service.GetBookingAsync();
             return Ok(bookings);
         }
         #endregion
@@ -32,7 +33,7 @@ namespace BookingService.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookingById(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
+            var booking = await _service.GetBookingByIdAsync(id);
             if (booking == null)
             {
                 return NotFound();
@@ -45,9 +46,7 @@ namespace BookingService.Api.Controllers
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetBookingsByUserId(int userId)
         {
-            var bookings = await _context.Bookings
-                .Where(b => b.UserId == userId)
-                .ToListAsync();
+            var bookings = await _service.GetBookingByUserIdAsync(userId);
             return Ok(bookings);
         }
         #endregion
@@ -56,13 +55,7 @@ namespace BookingService.Api.Controllers
         [HttpPut("cancel/{id}")]
         public async Task<IActionResult> CancelBooking(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null) return NotFound();
-
-            booking.PaymentStatus = "Cancelled";
-            booking.Modified = DateTime.Now;
-
-            await _context.SaveChangesAsync();
+            var booking = await _service.CancelBookingAsync(id);
             return Ok(booking);
         }
         #endregion
@@ -71,10 +64,7 @@ namespace BookingService.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking(Booking booking)
         {
-            booking.Created = DateTime.Now;
-            booking.Modified = DateTime.Now;
-            await _context.Bookings.AddAsync(booking);
-            await _context.SaveChangesAsync();
+            var createdBooking = await _service.CreateBookingAsync(booking);
             return Ok(booking);
         }
         #endregion
@@ -83,9 +73,7 @@ namespace BookingService.Api.Controllers
         [HttpGet("show/{showId}")]
         public async Task<IActionResult> GetBookingsByShow(int showId)
         {
-            var bookings = await _context.Bookings
-                .Where(b => b.ShowId == showId && b.PaymentStatus == "Completed")
-                .ToListAsync();
+            var bookings = await _service.GetBookingByShowIdAsync(showId);
 
             return Ok(bookings);
         }
@@ -95,14 +83,8 @@ namespace BookingService.Api.Controllers
         [HttpPut("status/{id}")]
         public async Task<IActionResult> UpdateBookingStatus(int id, string PaymentStatus)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null) return NotFound();
-
-            booking.PaymentStatus = PaymentStatus;
-            booking.Modified = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-            return Ok(booking);
+           var result = await _service.UpdateBookingStatusAsync(id, PaymentStatus);
+              return Ok(result);
         }
         #endregion
 
