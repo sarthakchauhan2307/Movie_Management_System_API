@@ -57,5 +57,13 @@ namespace TheatreMasterService.Api.Controllers
                 => Ok(await _service.GetShowsByMovieId(movieId));
 
         #endregion
+
+        #region GetAvailableSeats
+        [HttpGet("{showId}/available-seats")]
+        public async Task<IActionResult> GetAvailableSeats(int showId)
+        {
+            return Ok(await _service.GetAvailableSeatsAsync(showId));
+        }
+        #endregion
     }
 }

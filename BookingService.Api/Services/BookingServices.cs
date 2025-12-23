@@ -1,4 +1,5 @@
-﻿using BookingService.Api.Models;
+﻿using BookingService.Api.Messaging;
+using BookingService.Api.Models;
 using BookingService.Api.Repository;
 
 namespace BookingService.Api.Services
@@ -8,10 +9,12 @@ namespace BookingService.Api.Services
         #region Configuration
         private readonly IBookingRepository _bookingRepository;
         private readonly MicroServiceGateway _gateway;
-        public BookingServices(IBookingRepository bookingRepository ,MicroServiceGateway gateway)
+        private readonly IMessageBusClient _messageBusClient;
+        public BookingServices(IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient)
         {
             _bookingRepository = bookingRepository;
             _gateway = gateway;
+            _messageBusClient = messageBusClient;
         }
         #endregion
 
@@ -35,7 +38,31 @@ namespace BookingService.Api.Services
             booking.PaymentStatus = "Completed";
             booking.Created = DateTime.Now;
             booking.Modified = DateTime.Now;
-            return await _bookingRepository.CreateBookingAsync(booking);
+
+            // 1️ Save booking
+            var createdBooking = await _bookingRepository.CreateBookingAsync(booking);
+
+            // 2️ Get Show + Movie details
+            var showDetails =
+                await _gateway.GetShowDetailsAsync(createdBooking.ShowId);
+
+            //adding movie
+            var movie = await _gateway.GetMovieAsync(showDetails.MovieId);
+
+            // 3️ Publish RabbitMQ event
+            var eventMessage = new BookingConfirmed
+            {
+                BookingId = createdBooking.BookingId,
+                ShowId = createdBooking.ShowId,
+                SeatCount = createdBooking.SeatCount,
+                Title = movie.Title,
+                ShowTime = showDetails.ShowTime
+
+            };
+
+            await _messageBusClient.PublishConfirmedBookingAsync(eventMessage);
+
+            return createdBooking;
         }
         #endregion
 
@@ -80,6 +107,14 @@ namespace BookingService.Api.Services
 
             await _bookingRepository.UpdateBookingAsync(booking);
             return true;
+        }
+        #endregion
+
+        #region GetBookedSeatCountByShowAsync
+        public async Task<int> GetBookedSeatCountByShowAsync(int showId)
+        {
+            // Business rule layer (can extend later)
+            return await _bookingRepository.GetBookedSeatCountByShowAsync(showId);
         }
         #endregion
 

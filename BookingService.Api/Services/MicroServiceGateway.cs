@@ -1,4 +1,7 @@
-﻿namespace BookingService.Api.Services
+﻿using BookingService.Api.DTo;
+using System.Text.Json;
+
+namespace BookingService.Api.Services
 {
     public class MicroServiceGateway
     {
@@ -48,7 +51,52 @@
         }
         #endregion
 
-        
+        //  ADD THIS (FOR RABBITMQ)
+        #region GetShowDetails
+        public async Task<BookingShow> GetShowDetailsAsync(int showId)
+        {
+            var baseUrl = _configuration["MicroServiceUrls:TheatreMasterService"];
+            if (string.IsNullOrEmpty(baseUrl))
+                throw new InvalidOperationException("TheatreMasterService URL not configured");
+
+            var url = $"{baseUrl}/api/Show/GetShowById/{showId}";
+
+            var response = await _httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Unable to fetch show details");
+
+            var showDetails =
+             await response.Content.ReadFromJsonAsync<BookingShow>(
+                 new JsonSerializerOptions
+                 {
+                     PropertyNameCaseInsensitive = true
+                 }
+            );
+
+            return showDetails!;
+        }
+        #endregion
+
+        #region GetMovieAsync
+        public async Task<MovieDto> GetMovieAsync(int movieId)
+        {
+            var baseUrl = _configuration["MicroServiceUrls:Movieservice"];
+            if (string.IsNullOrEmpty(baseUrl))
+                throw new InvalidOperationException("MovieService URL not configured");
+
+            var url = $"{baseUrl}/api/Movies/GetMovieById/{movieId}";
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Unable to fetch movie");
+
+            var movie = await response.Content.ReadFromJsonAsync<MovieDto>(
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return movie!;
+        }
+        #endregion
+
 
     }
 }

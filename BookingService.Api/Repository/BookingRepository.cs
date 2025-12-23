@@ -65,5 +65,15 @@ namespace BookingService.Api.Repository
         }
         #endregion
 
+        #region GetBookedSeatCount
+        public async Task<int> GetBookedSeatCountByShowAsync(int showId)
+        {
+            return await _context.Bookings
+                .Where(b => b.ShowId == showId && b.PaymentStatus == "Completed")
+                .SumAsync(b => b.SeatCount);
+        }
+        #endregion
+
+
     }
 }

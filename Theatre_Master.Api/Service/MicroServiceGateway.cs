@@ -32,6 +32,23 @@
         }
         #endregion
 
+        #region GetBookedSeatCountByShow
+        public async Task<int> GetBookedSeatsByShowAsync(int showId)
+        {
+            var baseUrl = _configuration["MicroServiceUrls:BookingService"];
+            if (string.IsNullOrEmpty(baseUrl))
+                throw new InvalidOperationException("BookingService URL not configured");
+
+            var response = await _httpClient.GetAsync(
+                $"{baseUrl}/api/Booking/GetBookedSeatCount/show/{showId}/seatcount"
+            );
+
+            if (!response.IsSuccessStatusCode)
+                return 0;
+
+            return await response.Content.ReadFromJsonAsync<int>();
+        }
+        #endregion
 
     }
 }

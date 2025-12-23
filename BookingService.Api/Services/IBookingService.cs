@@ -11,6 +11,7 @@ namespace BookingService.Api.Services
         Task<IEnumerable<Booking>> GetBookingByUserIdAsync(int userId);
         Task<IEnumerable<Booking>> GetBookingByShowIdAsync(int showId);
         Task<bool> UpdateBookingStatusAsync(int bookingId, string status);
+        Task<int> GetBookedSeatCountByShowAsync(int showId);
 
     }
 }

@@ -7,9 +7,11 @@ namespace TheatreMasterService.Api.Service
     {
         #region Configuration
         private readonly IShowRepository _showRepository;
+        private readonly IScreenRepository _screenRepository;
         private readonly MicroServiceGateway _gateway;
-        public ShowService(IShowRepository showRepository, MicroServiceGateway gateway)
+        public ShowService(IShowRepository showRepository, MicroServiceGateway gateway , IScreenRepository screenRepository)
         {
+            _screenRepository = screenRepository;
             _showRepository = showRepository;
             _gateway = gateway;
         }
@@ -43,7 +45,7 @@ namespace TheatreMasterService.Api.Service
         #endregion
 
         #region UpdateShowAsync
-        public async Task<bool> UpdateShowAsync(int id,Show show)
+        public async Task<bool> UpdateShowAsync(int id, Show show)
         {
             var existingShow = await _showRepository.GetShowByIdAsync(id);
             if (existingShow == null)
@@ -71,8 +73,39 @@ namespace TheatreMasterService.Api.Service
         public async Task<IEnumerable<Show>> GetShowsByMovieId(int movieId)
         {
             var allShows = await _showRepository.GetShowsByMovieId(movieId);
-           return(allShows);
+            return (allShows);
+        }
+        #endregion
+
+        #region GetAvailableSeatsAsync
+        public async Task<object> GetAvailableSeatsAsync(int showId)
+        {
+            // 1️ Get Show
+            var show = await _showRepository.GetShowByIdAsync(showId);
+            if (show == null)
+                throw new Exception("Show not found");
+
+            // 2️ Get Screen
+            var screen = await _screenRepository.GetScreenByIdAsync(show.ScreenId);
+            if (screen == null)
+                throw new Exception("Screen not found");
+
+            // 3️ Get booked seats from BookingService
+            var bookedSeats = await _gateway.GetBookedSeatsByShowAsync(showId);
+
+            // 4️ Calculate available seats
+            var availableSeats = screen.SeatCapacity - bookedSeats;
+            if (availableSeats < 0) availableSeats = 0;
+
+            return new
+            {
+                ShowId = showId,
+                ScreenId = screen.ScreenId,
+                TotalSeats = screen.SeatCapacity,
+                BookedSeats = bookedSeats,
+                AvailableSeats = availableSeats
+            };
         }
         #endregion
     }
-}
+ }

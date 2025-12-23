@@ -88,6 +88,15 @@ namespace BookingService.Api.Controllers
         }
         #endregion
 
-       
+        #region GetBookedSeatCountByShow
+        [HttpGet("show/{showId}/seatcount")]
+        public async Task<IActionResult> GetBookedSeatCount(int showId)
+        {
+            var count = await _service.GetBookedSeatCountByShowAsync(showId);
+            return Ok(count);
+        }
+        #endregion
+
+
     }
 }

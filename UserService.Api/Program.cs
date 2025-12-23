@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UserService.Api.Data;
+using UserService.Api.Messaging;
 using UserService.Api.Repositories;
 using UserService.Api.Services;
 
@@ -21,6 +22,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 //Adding Services DI
 builder.Services.AddScoped<IUserService, UserServices>();
 builder.Services.AddHttpClient<MicroServiceGateway>();
+
+//add configuration for MessageBusClient
+builder.Services.AddHostedService<RabbitMQSubscriber>();
 
 var app = builder.Build();
 

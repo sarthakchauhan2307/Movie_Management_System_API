@@ -1,4 +1,5 @@
 using BookingService.Api.Data;
+using BookingService.Api.Messaging;
 using BookingService.Api.Repository;
 using BookingService.Api.Services;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,9 @@ builder.Services.AddDbContext<BookingServiceDbContext>(options =>
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingServices>();
 builder.Services.AddHttpClient<MicroServiceGateway>();
+
+//add configuration for MessageBusClient
+builder.Services.AddSingleton<IMessageBusClient,MessageBusClient>();
 
 var app = builder.Build();
 
