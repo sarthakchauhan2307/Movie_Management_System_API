@@ -20,6 +20,8 @@ builder.Services.AddScoped<IMoviesRepository, MoviesRepository>();
 builder.Services.AddScoped<IMoviesService, MoviesService>();
 builder.Services.AddHttpClient<MicroServiceGateway>();
 
+// Register Dapper Context
+builder.Services.AddScoped<DapperContext>();
 
 var app = builder.Build();
 

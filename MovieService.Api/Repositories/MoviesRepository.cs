@@ -1,15 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
 using MovieService.Api.Data;
 using MovieService.Api.Models;
+using System.Data;
 
 namespace MovieService.Api.Repositories
 {
     public class MoviesRepository : IMoviesRepository
     {
         #region Configuration
-        private readonly MoviesDbContext _context;
+        private readonly DapperContext _context;
 
-        public MoviesRepository(MoviesDbContext context)
+        public MoviesRepository(DapperContext context)
         {
             _context = context;
         }
@@ -18,22 +20,50 @@ namespace MovieService.Api.Repositories
         #region GetMovies
         public async Task<IEnumerable<Movies>> GetMoviesAsync()
         {
-            return await _context.Movies.ToListAsync();
+            using var connection = _context.CreateConnection();
+
+            return await connection.QueryAsync<Movies>(
+                "SP_GetMovie",
+                commandType: CommandType.StoredProcedure
+               );
         }
         #endregion
 
         #region GetMoviesByIdAsync
         public async Task<Movies?> GetMoviesByIdAsync(int id)
         {
-            return await _context.Movies.FindAsync(id);
+           using var connection = _context.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<Movies>(
+                "SP_GetMovieById",
+                new { MovieId = id },
+                commandType: CommandType.StoredProcedure
+               );
         }
         #endregion
 
         #region CreateMoviesAsync
         public async Task<Movies> CreateMoviesAsync(Movies movie)
         {
-            await _context.Movies.AddAsync(movie);
-            await _context.SaveChangesAsync();
+          using var connection = _context.CreateConnection();
+            var movieId = await connection.QuerySingleAsync<int>(
+                "SP_CreateMovie",
+                new
+                {
+                    movie.Title,
+                    movie.Genre,
+                    movie.ReleaseDate,
+                    movie.Director,
+                    movie.Description,
+                    movie.Actor,
+                    movie.Actress,
+                    movie.Language,
+                    movie.DurationMinutes,
+                    movie.PosterUrl,
+                    movie.TrailerUrl
+                },
+                commandType: CommandType.StoredProcedure
+               );
+            movie.MovieId = movieId;
             return movie;
         }
         #endregion
@@ -41,19 +71,40 @@ namespace MovieService.Api.Repositories
         #region UpdateMoviesAsync
         public async Task<bool> UpdateMoviesAsync(Movies movie)
         {
-            _context.Movies.Update(movie);
-            return await _context.SaveChangesAsync() > 0;
+            using var connection = _context.CreateConnection();
+            var affectedRows = await connection.ExecuteAsync(
+                "SP_UpdateMovie",
+                new
+                {
+                    movie.MovieId,
+                    movie.Title,
+                    movie.Genre,
+                    movie.ReleaseDate,
+                    movie.Director,
+                    movie.Description,
+                    movie.Actor,
+                    movie.Actress,
+                    movie.Language,
+                    movie.DurationMinutes,
+                    movie.PosterUrl,
+                    movie.TrailerUrl
+                },
+                commandType: CommandType.StoredProcedure
+               );
+            return affectedRows > 0;
         }
         #endregion
 
         #region DeleteMoviesAsync
         public async Task<bool> DeleteMoviesAsync(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
-            if (movie == null)
-                return false;
-            _context.Movies.Remove(movie);
-            return await _context.SaveChangesAsync() > 0;
+            using var connection = _context.CreateConnection();
+            var affectedRows = await connection.ExecuteAsync(
+                "SP_DeleteMovie",
+                new { MovieId = id },
+                commandType: CommandType.StoredProcedure
+               );
+            return affectedRows > 0;
         }
         #endregion
 

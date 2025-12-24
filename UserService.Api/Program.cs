@@ -26,6 +26,9 @@ builder.Services.AddHttpClient<MicroServiceGateway>();
 //add configuration for MessageBusClient
 builder.Services.AddHostedService<RabbitMQSubscriber>();
 
+//adding Dapper Context
+builder.Services.AddScoped<DapperContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
