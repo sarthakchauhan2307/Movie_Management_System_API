@@ -46,6 +46,9 @@ namespace BookingService.Api.Services
             var showDetails =
                 await _gateway.GetShowDetailsAsync(createdBooking.ShowId);
 
+            //calculate total price
+            booking.TotalAmount = booking.SeatCount * showDetails.Price;
+
             //adding movie
             var movie = await _gateway.GetMovieAsync(showDetails.MovieId);
 

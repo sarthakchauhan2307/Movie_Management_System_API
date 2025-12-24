@@ -1,4 +1,5 @@
-﻿using TheatreMaster.Api.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using TheatreMaster.Api.Models;
 using TheatreMasterService.Api.Repository;
 
 namespace TheatreMasterService.Api.Service
@@ -107,5 +108,17 @@ namespace TheatreMasterService.Api.Service
             };
         }
         #endregion
+
+        #region ReduceSeatsAsync
+        public async Task ReduceSeatsAsync(int showId, int seatCount)
+        {
+            var show = await _showRepository.GetShowByIdAsync(showId);
+            if (show == null)
+                throw new Exception("Show not found");
+
+            Console.WriteLine(
+                $"[RabbitMQ] Booking confirmed. ShowId={showId}, Seats={seatCount}");
+        }
+        #endregion
     }
- }
+}

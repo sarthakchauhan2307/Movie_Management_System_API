@@ -2,6 +2,7 @@ using TheatreMaster.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using TheatreMasterService.Api.Repository;
 using TheatreMasterService.Api.Service;
+using TheatreMasterService.Api.Subscriber;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,9 @@ builder.Services.AddScoped<IShowService, ShowService>();
 
 //adding http client factory for interservice communication
 builder.Services.AddHttpClient<MicroServiceGateway>();
+
+//adding background service for rabbitmq subscriber
+builder.Services.AddHostedService<RabbitMQSubscriber>();
 
 var app = builder.Build();
 

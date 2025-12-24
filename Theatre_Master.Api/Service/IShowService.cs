@@ -11,5 +11,6 @@ namespace TheatreMasterService.Api.Service
         Task<bool> DeleteShowAsync(int id);
         Task<IEnumerable<Show>> GetShowsByMovieId(int movieId);
         Task<object> GetAvailableSeatsAsync(int showId);
+        Task ReduceSeatsAsync(int showId, int seatCount);
     }
 }
