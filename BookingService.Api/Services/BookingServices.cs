@@ -1,4 +1,5 @@
-﻿using BookingService.Api.Messaging;
+﻿using BookingService.Api.DTo;
+using BookingService.Api.Messaging;
 using BookingService.Api.Models;
 using BookingService.Api.Repository;
 
@@ -10,11 +11,13 @@ namespace BookingService.Api.Services
         private readonly IBookingRepository _bookingRepository;
         private readonly MicroServiceGateway _gateway;
         private readonly IMessageBusClient _messageBusClient;
-        public BookingServices(IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient)
+        private readonly IBookingSeatRepository _seatRepository;
+        public BookingServices(IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient, IBookingSeatRepository seatRepository)
         {
             _bookingRepository = bookingRepository;
             _gateway = gateway;
             _messageBusClient = messageBusClient;
+            _seatRepository = seatRepository;
         }
         #endregion
 
@@ -93,7 +96,7 @@ namespace BookingService.Api.Services
             }
             booking.PaymentStatus = "Cancelled";
             booking.Modified = DateTime.Now;
-            await _bookingRepository.CreateBookingAsync(booking);
+            await _bookingRepository.UpdateBookingAsync(booking);
             return true;
         }
         #endregion
@@ -118,6 +121,32 @@ namespace BookingService.Api.Services
         {
             // Business rule layer (can extend later)
             return await _bookingRepository.GetBookedSeatCountByShowAsync(showId);
+        }
+        #endregion
+
+        #region BulkBookingAsync (TVP + REAL PRICE)
+        public async Task BulkBookSeatsAsync(
+            int bookingId,
+            int showId,
+            List<int> seatNos)
+        {
+            // 1️⃣ Fetch Show price (SINGLE SOURCE OF TRUTH)
+            var showDetails = await _gateway.GetShowDetailsAsync(showId);
+            int price = showDetails.Price;
+
+            // 2️⃣ Prepare TVP rows
+            var seats = seatNos.Select(no => new BookingSeatTvpDto
+            {
+                SeatNo = no,
+                Price = price
+            }).ToList();
+
+            // 3️⃣ Bulk insert seats (Dapper + TVP)
+            await _seatRepository.BulkInsertSeatsAsync(
+                bookingId,
+                showId,
+                seats
+            );
         }
         #endregion
 

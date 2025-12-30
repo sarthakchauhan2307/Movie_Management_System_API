@@ -18,10 +18,14 @@ builder.Services.AddDbContext<BookingServiceDbContext>(options =>
 
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingServices>();
+builder.Services.AddScoped<IBookingSeatRepository, BookingSeatRepository>();
 builder.Services.AddHttpClient<MicroServiceGateway>();
 
 //add configuration for MessageBusClient
 builder.Services.AddSingleton<IMessageBusClient,MessageBusClient>();
+
+//adding Dapper Context
+builder.Services.AddScoped<DapperContext>();
 
 var app = builder.Build();
 

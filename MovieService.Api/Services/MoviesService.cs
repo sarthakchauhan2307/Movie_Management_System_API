@@ -54,17 +54,28 @@ namespace MovieService.Api.Services
         #region UpdateMoviesAsync
         public async Task<bool> UpdateMoviesAsync(int id, Movies movie)
         {
+            if (id != movie.MovieId)
+                return false;
             var existingMovie = await _moviesRepository.GetMoviesByIdAsync(id);
             if (existingMovie == null)
                 return false;
+
             existingMovie.Title = movie.Title;
-            existingMovie.Description = movie.Description;
-            existingMovie.DurationMinutes = movie.DurationMinutes;
             existingMovie.Genre = movie.Genre;
             existingMovie.ReleaseDate = movie.ReleaseDate;
+            existingMovie.Director = movie.Director;
+            existingMovie.Description = movie.Description;
+            existingMovie.Actor = movie.Actor;
+            existingMovie.Actress = movie.Actress;
+            existingMovie.Language = movie.Language;
+            existingMovie.DurationMinutes = movie.DurationMinutes;
+            existingMovie.PosterUrl = movie.PosterUrl;
+            existingMovie.TrailerUrl = movie.TrailerUrl;
+
             return await _moviesRepository.UpdateMoviesAsync(existingMovie);
         }
         #endregion
+
 
     }
 }

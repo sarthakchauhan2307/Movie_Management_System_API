@@ -97,6 +97,21 @@ namespace BookingService.Api.Controllers
         }
         #endregion
 
+        #region BulkSeatBooking
+        [HttpPost]
+        public async Task<IActionResult> BulkBookSeats(
+            BulkSeatBookingRequest request)
+        {
+            await _service.BulkBookSeatsAsync(
+                request.BookingId,
+                request.ShowId,
+                request.SeatNos
+            );
+
+            return Ok("Seats booked successfully using TVP");
+        }
+        #endregion
+
 
     }
 }

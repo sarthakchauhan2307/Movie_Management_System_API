@@ -13,6 +13,11 @@ namespace BookingService.Api.Services
         Task<bool> UpdateBookingStatusAsync(int bookingId, string status);
         Task<int> GetBookedSeatCountByShowAsync(int showId);
 
+        Task BulkBookSeatsAsync(
+        int bookingId,
+        int showId,
+        List<int> seatNos);
+
     }
 }
     

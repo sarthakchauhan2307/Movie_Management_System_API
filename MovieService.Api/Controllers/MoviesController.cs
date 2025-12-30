@@ -42,11 +42,15 @@ namespace MovieService.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMovie(int id, Movies movie)
         {
-            var result = await _movieservice.UpdateMoviesAsync(id, movie);
-            if (!result)
+            var existingMovie = await _movieservice.GetMoviesByIdAsync(id);
+            if (existingMovie == null)
                 return NotFound("Movie not found");
+            movie.MovieId = id;
+            bool sucess = await _movieservice.UpdateMoviesAsync(id, movie);
 
-            return Ok("Movie updated successfully");
+            return sucess
+        ? NoContent()
+        : NotFound("Movie not found");
         }
         #endregion
 

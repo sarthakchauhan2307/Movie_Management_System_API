@@ -49,6 +49,8 @@ namespace UserService.Api.Services
             var existingUser = await _userRepository.GetUserByIdAsync(id);
             if (existingUser == null)
                 throw new KeyNotFoundException("User not found");
+            existingUser.PhoneNumber = user.PhoneNumber;
+            existingUser.Password = user.Password;
             existingUser.UserName = user.UserName;
             existingUser.Email = user.Email;
             existingUser.Modified = DateTime.Now;

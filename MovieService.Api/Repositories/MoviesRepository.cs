@@ -91,7 +91,7 @@ namespace MovieService.Api.Repositories
                 },
                 commandType: CommandType.StoredProcedure
                );
-            return affectedRows > 0;
+            return affectedRows >0;
         }
         #endregion
 
