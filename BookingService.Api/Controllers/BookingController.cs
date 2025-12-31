@@ -112,6 +112,31 @@ namespace BookingService.Api.Controllers
         }
         #endregion
 
+        #region UploadExcel
+        [HttpPost("upload-excel")]
+        public async Task<IActionResult> UploadExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+            using (var stream = file.OpenReadStream())
+            {
+                await _service.UploadExcelAndBulkInsertAsync(stream);
+            }
+            return Ok("Seats booked successfully from Excel file.");
+        }
+        #endregion
+
+        #region GetBookedSeatsByBookingId
+        [HttpGet("{bookingId}/seats")]
+        public async Task<IActionResult> GetBookedSeats(int bookingId)
+        {
+            var seats = await _service.GetBookedSeatsAsync(bookingId);
+            return Ok(seats);
+        }
+        #endregion
+
 
     }
 }

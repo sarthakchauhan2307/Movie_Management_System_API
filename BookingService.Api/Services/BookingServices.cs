@@ -2,6 +2,7 @@
 using BookingService.Api.Messaging;
 using BookingService.Api.Models;
 using BookingService.Api.Repository;
+using ClosedXML.Excel;
 
 namespace BookingService.Api.Services
 {
@@ -149,6 +150,78 @@ namespace BookingService.Api.Services
             );
         }
         #endregion
+
+        #region UploadExcelAndBulkInsertAsync
+
+        public async Task UploadExcelAndBulkInsertAsync(Stream file)
+        {
+            var rowsData = new List<BookingSeatExcelDto>();
+
+            using var workbook = new XLWorkbook(file);
+            var sheet = workbook.Worksheet(1);
+
+            //  Basic header check
+            if (sheet.Cell(1, 1).GetString() != "BookingId" ||
+                sheet.Cell(1, 2).GetString() != "ShowId" ||
+                sheet.Cell(1, 3).GetString() != "SeatNo" ||
+                sheet.Cell(1, 4).GetString() != "Price")
+            {
+                throw new Exception("Invalid Excel format");
+            }
+
+            //  Read rows
+            foreach (var row in sheet.RowsUsed().Skip(1))
+            {
+                if (!row.Cell(1).TryGetValue(out int bookingId) ||
+                    !row.Cell(2).TryGetValue(out int showId) ||
+                    !row.Cell(3).TryGetValue(out int seatNo) ||
+                    !row.Cell(4).TryGetValue(out int price))
+                {
+                    throw new Exception($"Invalid data at row {row.RowNumber()}");
+                }
+
+                rowsData.Add(new BookingSeatExcelDto
+                {
+                    BookingId = bookingId,
+                    ShowId = showId,
+                    SeatNo = seatNo,
+                    Price = price
+                });
+            }
+
+            // Check duplicate seats inside Excel
+            if (rowsData.GroupBy(x => new { x.ShowId, x.SeatNo }).Any(g => g.Count() > 1))
+            {
+                throw new Exception("Duplicate SeatNo found in Excel");
+            }
+
+            //  Group and bulk insert
+            foreach (var group in rowsData.GroupBy(x => new { x.BookingId, x.ShowId }))
+            {
+                var seats = group.Select(x => new BookingSeatTvpDto
+                {
+                    SeatNo = x.SeatNo,
+                    Price = x.Price
+                }).ToList();
+
+                await _seatRepository.BulkInsertSeatsAsync(
+                    group.Key.BookingId,
+                    group.Key.ShowId,
+                    seats
+                );
+            }
+        }
+
+        #endregion
+            
+
+        #region GetBookedSeatsByBookingId
+        public async Task<List<int>> GetBookedSeatsAsync(int bookingId)
+        {
+            return await _seatRepository.GetBookedSeatsByBookingIdAsync(bookingId);
+        }
+        #endregion
+
 
 
     }

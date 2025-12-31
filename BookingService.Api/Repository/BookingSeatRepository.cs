@@ -51,5 +51,19 @@ namespace BookingService.Api.Repository
             );
         }
         #endregion
+
+        #region SeeBulkResult
+        public async Task<List<int>> GetBookedSeatsByBookingIdAsync(int bookingId)
+        {
+            using var connection = _context.CreateConnection();
+
+            var seats = await connection.QueryAsync<int>(
+                "SELECT SeatNo FROM BookingSeats WHERE BookingId = @BookingId",
+                new { BookingId = bookingId });
+
+            return seats.ToList();
+        }
+        #endregion
+
     }
 }

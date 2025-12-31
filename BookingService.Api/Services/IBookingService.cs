@@ -17,6 +17,10 @@ namespace BookingService.Api.Services
         int bookingId,
         int showId,
         List<int> seatNos);
+        Task UploadExcelAndBulkInsertAsync(Stream file);
+
+        Task<List<int>> GetBookedSeatsAsync(int bookingId);
+
 
     }
 }

@@ -8,5 +8,7 @@ namespace BookingService.Api.Repository
             int BookingId,
             int ShowId,
             List<BookingSeatTvpDto> seats);
+        Task<List<int>> GetBookedSeatsByBookingIdAsync(int bookingId);
+
     }
 }
