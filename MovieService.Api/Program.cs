@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using MovieService.Api.Data;
 using MovieService.Api.Repositories;
@@ -22,6 +24,12 @@ builder.Services.AddHttpClient<MicroServiceGateway>();
 
 // Register Dapper Context
 builder.Services.AddScoped<DapperContext>();
+
+//Fluent Validation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+
 
 var app = builder.Build();
 
