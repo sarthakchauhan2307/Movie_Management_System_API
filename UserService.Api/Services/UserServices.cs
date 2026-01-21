@@ -3,7 +3,7 @@ using UserService.Api.Repositories;
 
 namespace UserService.Api.Services
 {
-    public class UserServices : IUserService
+    public class UserServices : IUserService 
     {
         #region Configuration
         private readonly IUserRepository _userRepository;

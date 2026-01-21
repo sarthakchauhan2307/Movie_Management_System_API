@@ -6,6 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Connection String for raddis
+var reddisConnection = builder.Configuration.GetConnectionString("RaddisURL");
+
+// Configure Redis Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = reddisConnection;
+    options.InstanceName = "BookingServiceInstance";
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();

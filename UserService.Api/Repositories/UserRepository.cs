@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 using UserService.Api.Data;
 using UserService.Api.Model;
@@ -10,34 +11,70 @@ namespace UserService.Api.Repositories
     {
         #region Configuration
         private readonly DapperContext _context;
+        private readonly IMemoryCache _cache; 
 
-        public UserRepository(DapperContext context)
+        public UserRepository(DapperContext context , IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
         #endregion
 
         #region GetUsersAsync
         public async Task<IEnumerable<User>> GetUserAsync()
         {
+            const string cacheKey = "all_users";
+
+            //  Check cache
+            if (_cache.TryGetValue(cacheKey, out IEnumerable<User> cachedUsers))
+            {
+                return cachedUsers;
+            }
+
+            //  Call DB using Dapper + SP
             using var connection = _context.CreateConnection();
 
-            return await connection.QueryAsync<User>("SP_GetUsers", commandType: CommandType.StoredProcedure);
+            var users = await connection.QueryAsync<User>(
+                "SP_GetUsers",
+                commandType: CommandType.StoredProcedure
+            );
+
+            // store result in cache (5 minutes)
+            _cache.Set(cacheKey, users, TimeSpan.FromMinutes(5));
+
+            return users;
         }
         #endregion
 
         #region GetUserByIdAsync
-        public async Task<User?> GetUserByIdAsync(int id)
+        public async Task<User?> GetUserByIdAsync(int userId)
         {
+            string cacheKey = $"user_{userId}";
+
+            // 1️ Check cache
+            if (_cache.TryGetValue(cacheKey, out User cachedUser))
+            {
+                return cachedUser;
+            }
+
+            // 2️ Call DB using Dapper + SP
             using var connection = _context.CreateConnection();
 
-            return await connection.QueryFirstOrDefaultAsync<User>
-                ("SP_GetUserById",
-                new { UserId = id },
-                commandType: CommandType.StoredProcedure);
+            var user = await connection.QueryFirstOrDefaultAsync<User>(
+                "SP_GetUserById",
+                new { UserId = userId },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // 3️ Store in cache
+            if (user != null)
+            {
+                _cache.Set(cacheKey, user, TimeSpan.FromMinutes(5));
+            }
+
+            return user;
         }
         #endregion
-
 
         #region CreateUserAsync
         public async Task<User> CreateUserAsync(User user)

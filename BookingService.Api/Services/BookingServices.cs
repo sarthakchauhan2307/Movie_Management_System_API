@@ -3,29 +3,51 @@ using BookingService.Api.Messaging;
 using BookingService.Api.Models;
 using BookingService.Api.Repository;
 using ClosedXML.Excel;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace BookingService.Api.Services
 {
-    public class BookingServices : IBookingService
+    public class BookingServices: IBookingService
     {
         #region Configuration
+        private readonly IDistributedCache _cache ;
         private readonly IBookingRepository _bookingRepository;
         private readonly MicroServiceGateway _gateway;
         private readonly IMessageBusClient _messageBusClient;
         private readonly IBookingSeatRepository _seatRepository;
-        public BookingServices(IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient, IBookingSeatRepository seatRepository)
+        public BookingServices(IDistributedCache cache ,IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient, IBookingSeatRepository seatRepository)
         {
+             _cache = cache;
             _bookingRepository = bookingRepository;
             _gateway = gateway;
             _messageBusClient = messageBusClient;
             _seatRepository = seatRepository;
+           
         }
         #endregion
 
         #region GetBookingAsync
         public async Task<IEnumerable<Booking>> GetBookingAsync()
         {
-            return await _bookingRepository.GetBookingAsync();
+            const string cacheKey = "all_bookings";
+
+            var cachedBookings = await _cache.GetStringAsync(cacheKey);
+            if (cachedBookings != null)
+            {
+                Console.WriteLine("Return from cache memory");
+                return JsonSerializer.Deserialize<IEnumerable<Booking>>(cachedBookings)!;
+            }
+            var bookings = await _bookingRepository.GetBookingAsync();
+
+            //  Store in cache (10 minutes)
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            };
+            string serializedData = JsonSerializer.Serialize(bookings);
+            await _cache.SetStringAsync(cacheKey, serializedData, cacheOptions);
+            return bookings;
         }
         #endregion
 

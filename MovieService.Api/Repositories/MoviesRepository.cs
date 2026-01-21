@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MovieService.Api.Data;
 using MovieService.Api.Models;
 using System.Data;
@@ -10,6 +11,7 @@ namespace MovieService.Api.Repositories
     {
         #region Configuration
         private readonly DapperContext _context;
+      
 
         public MoviesRepository(DapperContext context)
         {

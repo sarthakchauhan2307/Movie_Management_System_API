@@ -29,6 +29,8 @@ builder.Services.AddScoped<DapperContext>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
+//Adding caching
+builder.Services.AddMemoryCache();
 
 
 var app = builder.Build();
