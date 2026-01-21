@@ -54,7 +54,24 @@ namespace BookingService.Api.Services
         #region GetBookingByIdAsync
         public async Task<Booking?> GetBookingByIdAsync(int bookingId)
         {
-            return await _bookingRepository.GetBookingByIdAsync(bookingId);
+             string cacheKey = $"booking_{bookingId}";
+
+            string? cachedBooking = await _cache.GetStringAsync(cacheKey);
+            if (cachedBooking != null)
+            {
+                Console.WriteLine("Return from cache memory");
+                return JsonSerializer.Deserialize<Booking>(cachedBooking);
+            }
+            var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
+            //  Store in cache (10 minutes)
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            };
+            string serializedData = JsonSerializer.Serialize(booking);
+            await _cache.SetStringAsync(cacheKey, serializedData, cacheOptions);
+
+            return booking;
         }
         #endregion
 
@@ -149,28 +166,41 @@ namespace BookingService.Api.Services
 
         #region BulkBookingAsync (TVP + REAL PRICE)
         public async Task BulkBookSeatsAsync(
-            int bookingId,
-            int showId,
-            List<int> seatNos)
+      int bookingId,
+      int showId,
+      List<int> seatNos)
         {
-            // 1️⃣ Fetch Show price (SINGLE SOURCE OF TRUTH)
+            // 1️ Try locking all seats FIRST
+            foreach (var seatNo in seatNos)
+            {
+                bool locked = await TryLockSeatsAsync(showId, seatNo);
+
+                if (!locked)
+                {
+                    throw new Exception($"Seat {seatNo} is already booked or in progress");
+                }
+            }
+
+            // 2️ Fetch Show price
             var showDetails = await _gateway.GetShowDetailsAsync(showId);
             int price = showDetails.Price;
 
-            // 2️⃣ Prepare TVP rows
+            // 3️ Prepare TVP rows
             var seats = seatNos.Select(no => new BookingSeatTvpDto
             {
                 SeatNo = no,
                 Price = price
             }).ToList();
 
-            // 3️⃣ Bulk insert seats (Dapper + TVP)
+            // 4️ Bulk insert seats
             await _seatRepository.BulkInsertSeatsAsync(
                 bookingId,
                 showId,
                 seats
             );
         }
+
+
         #endregion
 
         #region UploadExcelAndBulkInsertAsync
@@ -244,6 +274,28 @@ namespace BookingService.Api.Services
         }
         #endregion
 
+
+        #region LockSeatAsync
+        private async Task<bool> TryLockSeatsAsync(int showId, int seatNo)
+        {
+            string lockKey = $"lock_show_{showId}_seat_{seatNo}";
+
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(100) // Lock expires in 100 seconds
+            };
+            // Try to set lock ONLY if it does not exist
+            var existingLock = await _cache.GetStringAsync(lockKey);
+            if (existingLock != null)
+            {
+                // Seat is already locked
+                return false;
+            }
+            // Create lock
+            await _cache.SetStringAsync(lockKey, "locked", options);
+            return true;
+        }
+        #endregion
 
 
     }
