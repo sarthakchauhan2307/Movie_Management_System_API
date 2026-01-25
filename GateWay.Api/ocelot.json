@@ -42,6 +42,20 @@
       "SwaggerKey": "Movieservice"
     },
     {
+      "UpstreamPathTemplate": "/posters/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/posters/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7053
+        }
+      ],
+      "SwaggerKey": "Movieservice"
+    },
+
+    {
       "UpstreamPathTemplate": "/api/theatre/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "DownstreamPathTemplate": "/api/{everything}",

@@ -1,4 +1,6 @@
-﻿using MovieService.Api.Models;
+﻿using MovieService.Api.DTos;
+using MovieService.Api.Helper;
+using MovieService.Api.Models;
 using MovieService.Api.Repositories;
 
 namespace MovieService.Api.Services
@@ -8,18 +10,42 @@ namespace MovieService.Api.Services
         #region Configuration
         private readonly IMoviesRepository _moviesRepository;
         private readonly MicroServiceGateway _microServiceGateway;
-        public MoviesService(IMoviesRepository moviesRepository, MicroServiceGateway microServiceGateway)
+        private readonly ImageHelper _imageHelper;
+        public MoviesService(IMoviesRepository moviesRepository, MicroServiceGateway microServiceGateway , ImageHelper imageHelper)
         {
             _moviesRepository = moviesRepository;
             _microServiceGateway = microServiceGateway;
+            _imageHelper = imageHelper;
         }
         #endregion
 
         #region CreateMoviesAsync
-        public async Task<Movies> CreateMoviesAsync(Movies movie)
+        public async Task<Movies> CreateMoviesAsync(MovieCreateUpdateDto dto)
         {
-            movie.Created = DateTime.Now;
-            movie.Modified = DateTime.Now;
+            string? posterUrl = null;
+
+            if (dto.File != null)
+            {
+                posterUrl = _imageHelper.SaveImage(dto.File, "posters/movies");
+            }
+
+            var movie = new Movies
+            {
+                Title = dto.Title,
+                Genre = dto.Genre,
+                ReleaseDate = dto.ReleaseDate,
+                Director = dto.Director,
+                Description = dto.Description,
+                Actor = dto.Actor,
+                Actress = dto.Actress,
+                Language = dto.Language,
+                DurationMinutes = dto.DurationMinutes,
+                TrailerUrl = dto.TrailerUrl,
+                PosterUrl = posterUrl,
+                Created = DateTime.Now,
+                Modified = DateTime.Now
+            };
+
             return await _moviesRepository.CreateMoviesAsync(movie);
         }
         #endregion
@@ -52,28 +78,33 @@ namespace MovieService.Api.Services
         #endregion
 
         #region UpdateMoviesAsync
-        public async Task<bool> UpdateMoviesAsync(int id, Movies movie)
+        public async Task<bool> UpdateMoviesAsync(int id, MovieCreateUpdateDto dto)
         {
-            if (id != movie.MovieId)
-                return false;
-            var existingMovie = await _moviesRepository.GetMoviesByIdAsync(id);
-            if (existingMovie == null)
+            var movie = await _moviesRepository.GetMoviesByIdAsync(id);
+            if (movie == null)
                 return false;
 
-            existingMovie.Title = movie.Title;
-            existingMovie.Genre = movie.Genre;
-            existingMovie.ReleaseDate = movie.ReleaseDate;
-            existingMovie.Director = movie.Director;
-            existingMovie.Description = movie.Description;
-            existingMovie.Actor = movie.Actor;
-            existingMovie.Actress = movie.Actress;
-            existingMovie.Language = movie.Language;
-            existingMovie.DurationMinutes = movie.DurationMinutes;
-            existingMovie.PosterUrl = movie.PosterUrl;
-            existingMovie.TrailerUrl = movie.TrailerUrl;
+            if (dto.File != null)
+            {
+                movie.PosterUrl = _imageHelper.SaveImage(dto.File, "posters/movies");
+            }
 
-            return await _moviesRepository.UpdateMoviesAsync(existingMovie);
+
+            movie.Title = dto.Title;
+            movie.Genre = dto.Genre;
+            movie.ReleaseDate = dto.ReleaseDate;
+            movie.Director = dto.Director;
+            movie.Description = dto.Description;
+            movie.Actor = dto.Actor;
+            movie.Actress = dto.Actress;
+            movie.Language = dto.Language;
+            movie.DurationMinutes = dto.DurationMinutes;
+            movie.TrailerUrl = dto.TrailerUrl;
+            movie.Modified = DateTime.Now;
+
+            return await _moviesRepository.UpdateMoviesAsync(movie);
         }
+
         #endregion
 
 

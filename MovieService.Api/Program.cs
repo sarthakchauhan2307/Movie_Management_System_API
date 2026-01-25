@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using MovieService.Api.Data;
+using MovieService.Api.Helper;
 using MovieService.Api.Repositories;
 using MovieService.Api.Services;
 
@@ -13,6 +14,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<ImageHelper>();
+
 
 builder.Services.AddDbContext<MoviesDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MovieServiceConnection")));
@@ -43,8 +47,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); //For serving static files like images
+
 
 app.UseAuthorization();
+
 
 app.MapControllers();
 

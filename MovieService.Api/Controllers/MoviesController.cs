@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieService.Api.Data;
+using MovieService.Api.DTos;
 using MovieService.Api.Models;
 using MovieService.Api.Services;
 
@@ -31,22 +32,22 @@ namespace MovieService.Api.Controllers
 
         #region AddMovie
         [HttpPost]
-        public async Task<IActionResult> AddMovie(Movies movie)
+        public async Task<IActionResult> AddMovie([FromForm] MovieCreateUpdateDto dto)
         {
             
-          return Ok( await _movieservice.CreateMoviesAsync(movie));
+          return Ok( await _movieservice.CreateMoviesAsync(dto));
         }
         #endregion
 
         #region UpdateMovie
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMovie(int id, Movies movie)
+        public async Task<IActionResult> UpdateMovie(int id, [FromForm] MovieCreateUpdateDto dto)
         {
             var existingMovie = await _movieservice.GetMoviesByIdAsync(id);
             if (existingMovie == null)
                 return NotFound("Movie not found");
-            movie.MovieId = id;
-            bool sucess = await _movieservice.UpdateMoviesAsync(id, movie);
+            //dto.MovieId = id;
+            bool sucess = await _movieservice.UpdateMoviesAsync(id, dto);
 
             return sucess
         ? NoContent()
