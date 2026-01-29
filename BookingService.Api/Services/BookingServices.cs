@@ -16,14 +16,15 @@ namespace BookingService.Api.Services
         private readonly MicroServiceGateway _gateway;
         private readonly IMessageBusClient _messageBusClient;
         private readonly IBookingSeatRepository _seatRepository;
-        public BookingServices(IDistributedCache cache ,IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient, IBookingSeatRepository seatRepository)
+        private readonly ILogger<BookingServices> _logger;
+        public BookingServices(IDistributedCache cache ,IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient, IBookingSeatRepository seatRepository, ILogger<BookingServices> logger)
         {
              _cache = cache;
             _bookingRepository = bookingRepository;
             _gateway = gateway;
             _messageBusClient = messageBusClient;
             _seatRepository = seatRepository;
-           
+           _logger = logger;
         }
         #endregion
 
@@ -31,7 +32,7 @@ namespace BookingService.Api.Services
         public async Task<IEnumerable<Booking>> GetBookingAsync()
         {
             const string cacheKey = "all_bookings";
-
+            _logger.LogInformation("Fetching all bookings from cache or database.");
             var cachedBookings = await _cache.GetStringAsync(cacheKey);
             if (cachedBookings != null)
             {
@@ -105,7 +106,7 @@ namespace BookingService.Api.Services
                 ShowTime = showDetails.ShowTime
 
             };
-
+            _logger.LogInformation($"Publishing booking confirmed event for BookingId: {eventMessage.BookingId}");
             await _messageBusClient.PublishConfirmedBookingAsync(eventMessage);
 
             return createdBooking;

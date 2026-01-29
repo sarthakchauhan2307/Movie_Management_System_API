@@ -13,10 +13,11 @@ namespace BookingService.Api.Controllers
     {
         #region configuration
         private readonly IBookingService _service;
-
-        public BookingController(IBookingService service)
+        private readonly ILogger<BookingController> _logger;
+        public BookingController(IBookingService service, ILogger<BookingController> logger)
         {
             _service = service;
+            _logger = logger;
         }
         #endregion
 
@@ -24,7 +25,10 @@ namespace BookingService.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBookings()
         {
+            _logger.LogInformation("GetBooking Is Called");
+            Console.WriteLine("GetBooking iS called");
             var bookings = await _service.GetBookingAsync();
+            _logger.LogInformation("Record Found {RecordCount}", bookings.Count());
             return Ok(bookings);
         }
         #endregion
@@ -64,6 +68,7 @@ namespace BookingService.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking(Booking booking)
         {
+            _logger.LogInformation("Boking is creating for" + booking.BookingId);
             var createdBooking = await _service.CreateBookingAsync(booking);
             return Ok(booking);
         }

@@ -1,42 +1,43 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ? SERILOG MUST BE CONFIGURED HERE (MOST IMPORTANT)
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+});
 
+// Add services
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
 builder.Services.AddOcelot(builder.Configuration);
-; builder.Services.AddSwaggerForOcelot(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddSwaggerForOcelot(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
-//builder.WebHost.UseKestrel(kestrelOptions =>
-//{
-//    kestrelOptions.ListenAnyIP(7130, listenOptions =>
-//    {
-//        listenOptions.UseHttps();
-//    });
-//});
+
 var app = builder.Build();
 
+//Serilog request logging (NOW it will work)
+app.UseSerilogRequestLogging();
 
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerForOcelotUI(opt =>
@@ -47,14 +48,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+//  Only once
 app.UseStaticFiles();
-
-
 
 app.UseAuthorization();
-app.UseStaticFiles();
+
 app.MapControllers();
 
+// Ocelot MUST be last
 await app.UseOcelot();
 
 app.Run();

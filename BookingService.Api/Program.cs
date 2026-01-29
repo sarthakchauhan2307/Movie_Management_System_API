@@ -3,8 +3,21 @@ using BookingService.Api.Messaging;
 using BookingService.Api.Repository;
 using BookingService.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+});
+
+
 
 //Connection String for raddis
 var reddisConnection = builder.Configuration.GetConnectionString("RaddisURL");
@@ -31,13 +44,22 @@ builder.Services.AddScoped<IBookingService, BookingServices>();
 builder.Services.AddScoped<IBookingSeatRepository, BookingSeatRepository>();
 builder.Services.AddHttpClient<MicroServiceGateway>();
 
+//Log.Logger = new LoggerConfiguration()
+//         .MinimumLevel.Information()
+//         .Enrich.FromLogContext()
+//         .WriteTo.Seq("http://localhost:5341")
+//        .CreateLogger();
 //add configuration for MessageBusClient
 builder.Services.AddSingleton<IMessageBusClient,MessageBusClient>();
+//builder.Host.UseSerilog();
 
 //adding Dapper Context
 builder.Services.AddScoped<DapperContext>();
 
 var app = builder.Build();
+
+//using seq
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
