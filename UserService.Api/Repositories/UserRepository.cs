@@ -135,5 +135,37 @@ namespace UserService.Api.Repositories
             return affectedRows > 0;
         }
         #endregion
+
+        #region GetByEmailAsync
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            string cacheKey = $"user_email_{email}";
+
+            // 1️⃣ Check cache
+            if (_cache.TryGetValue(cacheKey, out User cachedUser))
+            {
+                return cachedUser;
+            }
+
+            // 2️⃣ Call DB using Dapper + SP
+            using var connection = _context.CreateConnection();
+
+            var user = await connection.QueryFirstOrDefaultAsync<User>(
+                "SP_GetUserByEmail",   // Stored Procedure
+                new { Email = email },
+                commandType: CommandType.StoredProcedure
+            );
+
+            // 3️⃣ Store in cache
+            if (user != null)
+            {
+                _cache.Set(cacheKey, user, TimeSpan.FromMinutes(5));
+            }
+
+            return user;
+        }
+        #endregion
+
+
     }
 }

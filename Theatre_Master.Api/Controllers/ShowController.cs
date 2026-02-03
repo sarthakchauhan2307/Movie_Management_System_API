@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TheatreMaster.Api.Data;
@@ -10,6 +11,7 @@ namespace TheatreMasterService.Api.Controllers
     //[Route("api/[controller]/[action]")]
     [Route("/api/[controller]/[action]")]
     [ApiController]
+    //[Authorize]
     public class ShowController : ControllerBase
     {
         #region configuration

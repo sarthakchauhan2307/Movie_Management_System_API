@@ -1,6 +1,7 @@
 ﻿using BookingService.Api.Data;
 using BookingService.Api.Models;
 using BookingService.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace BookingService.Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    //[Authorize]
     public class BookingController : ControllerBase
     {
         #region configuration

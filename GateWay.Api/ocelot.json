@@ -11,6 +11,23 @@
           "Port": 7055
         }
       ],
+      "SwaggerKey": "Userservice",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityServiceKey"
+      }
+
+    },
+    {
+      "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/Auth/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7055
+        }
+      ],
       "SwaggerKey": "Userservice"
 
     },
@@ -25,7 +42,10 @@
           "Port": 7110
         }
       ],
-      "SwaggerKey": "Bookingservice"
+      "SwaggerKey": "Bookingservice",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityServiceKey"
+      }
 
     },
     {
@@ -40,6 +60,10 @@
         }
       ],
       "SwaggerKey": "Movieservice"
+        ,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityServiceKey"
+      }
     },
     {
       "UpstreamPathTemplate": "/posters/{everything}",
@@ -53,6 +77,9 @@
         }
       ],
       "SwaggerKey": "Movieservice"
+      //"AuthenticationOptions": {
+      //  "AuthenticationProviderKey": "IdentityServiceKey"
+      //}
     },
 
     {
@@ -66,7 +93,10 @@
           "Port": 7176
         }
       ],
-      "SwaggerKey": "TheatreMasterService"
+      "SwaggerKey": "TheatreMasterService",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityServiceKey"
+      }
     }
   ],
   "SwaggerEndPoints": [

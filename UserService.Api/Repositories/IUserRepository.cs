@@ -10,5 +10,7 @@ namespace UserService.Api.Repositories
         Task<User> CreateUserAsync(User user);
         Task<bool> UpdateUserAsync( User user);
         Task<bool> DeleteUserAsync(int id);
+
+        Task<User?> GetByEmailAsync(string email);
     }
 }
