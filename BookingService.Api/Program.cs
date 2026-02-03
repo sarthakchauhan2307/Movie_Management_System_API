@@ -2,9 +2,13 @@ using BookingService.Api.Data;
 using BookingService.Api.Messaging;
 using BookingService.Api.Repository;
 using BookingService.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +67,34 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+});
+
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var key = Encoding.ASCII.GetBytes(jwtSettings.GetValue<string>("Key"));
+
+builder.Services.AddAuthentication(options =>
+{
+    // Set the default scheme to "Bearer"
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings.GetValue<string>("Issuer"),
+        ValidateAudience = true,
+        ValidAudience = jwtSettings.GetValue<string>("Audience"),
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+        RoleClaimType = ClaimTypes.Role
+    };
 });
 
 

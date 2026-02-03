@@ -39,6 +39,7 @@ namespace TheatreMasterService.Api.Controllers
 
         #region AddScreen
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddScreen(Screen screen)
         {
            return Ok( await _service.CreateScreenAsync(screen));
@@ -47,6 +48,7 @@ namespace TheatreMasterService.Api.Controllers
 
         #region UpdateScreen
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateScreen(int id, Screen screen)
         {
             return Ok( await _service.UpdateScreenAsync(id, screen));
@@ -55,6 +57,7 @@ namespace TheatreMasterService.Api.Controllers
 
         #region DeleteScreen
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteScreen(int id)
         {
            return Ok( await _service.DeleteScreenAsync(id));

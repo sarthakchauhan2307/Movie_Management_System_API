@@ -31,6 +31,7 @@ namespace TheatreMasterService.Api.Controllers
 
         #region AddTheatre
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddTheatre(Theatre theatre)
             => Ok(await _theatreservice.CreateTheatreAsync(theatre));
         #endregion
@@ -43,12 +44,16 @@ namespace TheatreMasterService.Api.Controllers
 
         #region UpdateTheatre
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> UpdateTheatre(int id, Theatre theatre)
                 => Ok(await _theatreservice.UpdateTheatreAsync(id, theatre));
         #endregion
 
         #region DeleteTheatre
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> DeleteTheatre(int id)
               => Ok(await _theatreservice.DeleteTheatreAsync(id));
         #endregion

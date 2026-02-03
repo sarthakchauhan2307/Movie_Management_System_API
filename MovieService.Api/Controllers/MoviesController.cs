@@ -24,6 +24,7 @@ namespace MovieService.Api.Controllers
         #endregion
 
         #region GetMovies
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetMovies()
         {
@@ -34,6 +35,7 @@ namespace MovieService.Api.Controllers
 
         #region AddMovie
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddMovie([FromForm] MovieCreateUpdateDto dto)
         {
             
@@ -43,6 +45,7 @@ namespace MovieService.Api.Controllers
 
         #region UpdateMovie
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateMovie(int id, [FromForm] MovieCreateUpdateDto dto)
         {
             var existingMovie = await _movieservice.GetMoviesByIdAsync(id);
@@ -59,6 +62,7 @@ namespace MovieService.Api.Controllers
 
         #region DeleteMovie
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
             try

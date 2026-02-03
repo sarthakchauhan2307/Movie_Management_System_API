@@ -23,6 +23,7 @@ namespace UserService.Api.Controllers
         #endregion
 
         #region GetUser
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetUser()
         {
@@ -55,6 +56,7 @@ namespace UserService.Api.Controllers
         #endregion
 
         #region GetUserById
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {

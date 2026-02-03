@@ -37,18 +37,24 @@ namespace TheatreMasterService.Api.Controllers
 
         #region AddShow
         [HttpPost]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> AddShow(Show show)
           => Ok(await _service.CreateShowAsync(show));
         #endregion
 
         #region UpdateShow
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> UpdateShow(int id, Show show)
         => Ok(await _service.UpdateShowAsync(id, show));
         #endregion
 
         #region DeleteShow
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> DeleteShow(int id)
              => Ok(await _service.DeleteShowAsync(id));
         #endregion

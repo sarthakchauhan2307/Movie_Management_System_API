@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Serilog;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,7 +55,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings.GetValue<string>("Audience"),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
-        RoleClaimType = "role"
+        RoleClaimType = ClaimTypes.Role
     };
 
 });

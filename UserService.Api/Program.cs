@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 using UserService.Api.Data;
 using UserService.Api.Messaging;
@@ -70,7 +71,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings.GetValue<string>("Audience"),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
-        RoleClaimType = "role"
+        RoleClaimType = ClaimTypes.Role
     };
 });
 

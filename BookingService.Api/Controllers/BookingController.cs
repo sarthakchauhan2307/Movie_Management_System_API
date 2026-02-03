@@ -25,6 +25,8 @@ namespace BookingService.Api.Controllers
 
         #region GetBookings
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> GetBookings()
         {
             _logger.LogInformation("GetBooking Is Called");
