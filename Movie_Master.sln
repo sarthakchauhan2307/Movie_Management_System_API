@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheatreMasterService.Api", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingService.Api", "BookingService.Api\BookingService.Api.csproj", "{38A56D95-4476-48D8-A8DC-D5CC86A2AF4A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReviewService.Api", "ReviewService.Api\ReviewService.Api.csproj", "{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{38A56D95-4476-48D8-A8DC-D5CC86A2AF4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38A56D95-4476-48D8-A8DC-D5CC86A2AF4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38A56D95-4476-48D8-A8DC-D5CC86A2AF4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

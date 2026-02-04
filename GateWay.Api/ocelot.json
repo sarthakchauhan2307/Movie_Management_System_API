@@ -59,8 +59,7 @@
           "Port": 7053
         }
       ],
-      "SwaggerKey": "Movieservice"
-        ,
+      "SwaggerKey": "Movieservice",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "IdentityServiceKey"
       }
@@ -97,6 +96,25 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "IdentityServiceKey"
       }
+    }
+    ,
+    {
+      "UpstreamPathTemplate": "/api/review/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/Review/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7064
+        }
+      ],
+      "SwaggerKey": "ReviewService"
+      ,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "IdentityServiceKey"
+      }
+
     }
   ],
   "SwaggerEndPoints": [
@@ -137,6 +155,17 @@
           "Name": "Movie Service API",
           "Version": "v1",
           "Url": "https://localhost:7053/swagger/v1/swagger.json"
+        }
+      ]
+    }
+    ,
+    {
+      "Key": "ReviewService",
+      "Config": [
+        {
+          "Name": "Review Service API",
+          "Version": "v1",
+          "Url": "https://localhost:7064/swagger/v1/swagger.json"
         }
       ]
     }
