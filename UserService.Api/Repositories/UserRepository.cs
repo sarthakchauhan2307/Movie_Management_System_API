@@ -23,13 +23,13 @@ namespace UserService.Api.Repositories
         #region GetUsersAsync
         public async Task<IEnumerable<User>> GetUserAsync()
         {
-            const string cacheKey = "all_users";
+            //const string cacheKey = "all_users";
 
-            //  Check cache
-            if (_cache.TryGetValue(cacheKey, out IEnumerable<User> cachedUsers))
-            {
-                return cachedUsers;
-            }
+            ////  Check cache
+            //if (_cache.TryGetValue(cacheKey, out IEnumerable<User> cachedUsers))
+            //{
+            //    return cachedUsers;
+            //}
 
             //  Call DB using Dapper + SP
             using var connection = _context.CreateConnection();
@@ -40,7 +40,7 @@ namespace UserService.Api.Repositories
             );
 
             // store result in cache (5 minutes)
-            _cache.Set(cacheKey, users, TimeSpan.FromMinutes(5));
+            //_cache.Set(cacheKey, users, TimeSpan.FromMinutes(5));
 
             return users;
         }

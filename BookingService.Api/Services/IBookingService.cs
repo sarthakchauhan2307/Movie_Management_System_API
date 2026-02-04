@@ -21,9 +21,9 @@ namespace BookingService.Api.Services
 
         Task<List<int>> GetBookedSeatsAsync(int bookingId);
 
-   
+        Task<TicketPdfModel> BuildTicketPdfModelAsync(int bookingId);
 
-
+        byte[] GenerateTicketPdf(TicketPdfModel ticket);
     }
 }
     

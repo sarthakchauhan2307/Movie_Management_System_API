@@ -56,7 +56,8 @@ namespace UserService.Api.Controllers
         #endregion
 
         #region GetUserById
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {

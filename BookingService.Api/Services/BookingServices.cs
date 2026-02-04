@@ -1,9 +1,11 @@
 ﻿using BookingService.Api.DTo;
 using BookingService.Api.Messaging;
 using BookingService.Api.Models;
+using BookingService.Api.Pdf;
 using BookingService.Api.Repository;
 using ClosedXML.Excel;
 using Microsoft.Extensions.Caching.Distributed;
+using QuestPDF.Fluent;
 using System.Text.Json;
 
 namespace BookingService.Api.Services
@@ -17,7 +19,9 @@ namespace BookingService.Api.Services
         private readonly IMessageBusClient _messageBusClient;
         private readonly IBookingSeatRepository _seatRepository;
         private readonly ILogger<BookingServices> _logger;
-        public BookingServices(IDistributedCache cache ,IBookingRepository bookingRepository ,MicroServiceGateway gateway, IMessageBusClient messageBusClient, IBookingSeatRepository seatRepository, ILogger<BookingServices> logger)
+        private readonly IConfiguration _configuration;
+
+        public BookingServices(IDistributedCache cache ,IBookingRepository bookingRepository ,MicroServiceGateway gateway, IConfiguration configuration, IMessageBusClient messageBusClient, IBookingSeatRepository seatRepository, ILogger<BookingServices> logger)
         {
              _cache = cache;
             _bookingRepository = bookingRepository;
@@ -25,6 +29,7 @@ namespace BookingService.Api.Services
             _messageBusClient = messageBusClient;
             _seatRepository = seatRepository;
            _logger = logger;
+            _configuration = configuration;
         }
         #endregion
 
@@ -297,6 +302,66 @@ namespace BookingService.Api.Services
             return true;
         }
         #endregion
+
+        #region pdf
+        public async Task<TicketPdfModel> BuildTicketPdfModelAsync(int bookingId)
+        {
+            var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
+            if (booking == null)
+                throw new Exception("Booking not found");
+
+            var showDetails = await _gateway.GetShowDetailsAsync(booking.ShowId);
+            var movie = await _gateway.GetMovieAsync(showDetails.MovieId);
+            var user = await _gateway.GetUserAsync(booking.UserId);
+            var screen = await _gateway.GetScreenAsync(showDetails.ScreenId);
+            var theatre = await _gateway.GetTheatreAsync(screen.TheatreId);
+
+
+            var movieBaseUrl = _configuration["MicroServiceUrls:Movieservice"];
+            var posterUrl = $"{movieBaseUrl}{movie.PosterUrl}";
+
+            byte[] posterBytes = await _gateway.DownloadImageAsync(posterUrl);
+
+
+
+            var qrText =
+              $"BOOKING:{booking.BookingId}\n" +
+              $"MOVIE:{movie.Title}\n" +
+              $"DATE:{showDetails.ShowDate:dd-MM-yyyy}\n" +
+              $"TIME:{showDetails.ShowTime}\n" +
+              $"SCREEN:{screen.ScreenName}";
+
+            var qrBytes = QrCodeHelper.GenerateQrCode(qrText);
+
+            var ticketPdfModel = new TicketPdfModel
+            {
+                BookingId = booking.BookingId,
+                MovieName = movie.Title,
+                TheatreName = theatre.TheatreName,
+                Screen = screen.ScreenName,
+                Address = theatre.Address,
+                ShowTime = showDetails.ShowTime,
+                ShowDate = showDetails.ShowDate,
+                Amount = booking.TotalAmount,
+                UserName = user.UserName,
+                MoviePoster = posterBytes,
+                QrCodeImage = qrBytes
+            };
+
+
+
+            return ticketPdfModel;
+        }
+        #endregion
+        #region pdf
+        public byte[] GenerateTicketPdf(TicketPdfModel ticket)
+        {
+            var document = new TicketPdfDocument(ticket);
+            return document.GeneratePdf();
+        }
+        #endregion
+
+
 
 
     }

@@ -146,6 +146,36 @@ namespace BookingService.Api.Controllers
         }
         #endregion
 
+        #region Download ticket
+        [HttpGet("download/{bookingId}")]
+        public async Task<IActionResult> DownloadTicket(int bookingId)
+        {
+            var ticket = await _service.BuildTicketPdfModelAsync(bookingId);
+
+            var pdfBytes = _service.GenerateTicketPdf(ticket);
+
+            return File(
+                pdfBytes,
+                "application/pdf",
+                $"Ticket_{bookingId}.pdf"
+            );
+        }
+        #endregion
+
+        #region qr code
+
+        [HttpGet("qr/{bookingId}")]
+        public async Task<IActionResult> GetQrCode(int bookingId)
+        {
+            var ticket = await _service.BuildTicketPdfModelAsync(bookingId);
+
+            return File(
+                ticket.QrCodeImage,
+                "image/png",
+                $"QR_{bookingId}.png"
+            );
+        }
+        #endregion
 
     }
 }

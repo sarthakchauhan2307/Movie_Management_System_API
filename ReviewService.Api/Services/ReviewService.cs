@@ -6,21 +6,21 @@ namespace ReviewService.Api.Services
 {
     public class ReviewService : IReviewService
     {
-
-            private readonly IReviewRepository _repository;
+        #region configuration
+        private readonly IReviewRepository _repository;
 
             public ReviewService(IReviewRepository repository)
             {
                 _repository = repository;
             }
+        #endregion
 
-            public async Task CreateReviewAsync(CreateReviewDto dto, int userId)
+        #region CreateReviewAsync
+        public async Task CreateReviewAsync(CreateReviewDto dto, int userId)
             {
-                // 1️⃣ Validate enum
                 if (!Enum.IsDefined(typeof(ReviewCategory), dto.Category))
                     throw new Exception("Invalid review category");
 
-                // 2️⃣ Prevent duplicate review
                 var existingReview =
                     await _repository.GetByMovieAndUserAsync(dto.MovieId, userId);
 
@@ -40,8 +40,10 @@ namespace ReviewService.Api.Services
                 // 4️⃣ Save
                 await _repository.AddAsync(review);
             }
+        #endregion
 
-            public async Task<IEnumerable<ReviewModel>> GetReviewsByMovieAsync(int movieId)
+        #region GetReviewsByMovieAsync
+        public async Task<IEnumerable<ReviewModel>> GetReviewsByMovieAsync(int movieId)
             {
                 var reviews = await _repository.GetByMovieIdAsync(movieId);
 
@@ -54,8 +56,10 @@ namespace ReviewService.Api.Services
                     Description = r.Description,
                     CreatedAt = r.CreatedAt
                 });
-            }
+        }
+        #endregion
 
+        #region GetAllReviewsAsync
         public async Task<IEnumerable<ReviewModel>> GetAllReviewsAsync()
         {
             var reviews = await _repository.GetAllAsync();
@@ -70,31 +74,30 @@ namespace ReviewService.Api.Services
                 CreatedAt = r.CreatedAt
             });
         }
+        #endregion
+
+        #region UpdateReviewAsync
 
         public async Task UpdateReviewAsync(int reviewId, UpdateReviewDto dto, int userId)
         {
-            // 1️⃣ Validate enum
             if (!Enum.IsDefined(typeof(ReviewCategory), dto.Category))
                 throw new Exception("Invalid review category");
 
-            // 2️⃣ Get review by movie + user
             var review = await _repository.GetByIdAsync(reviewId);
 
             if (review == null)
                 throw new Exception("Review not found");
 
-            // 3️⃣ Ownership check
             if (review.UserId != userId)
                 throw new Exception("You are not allowed to update this review");
 
-            // 4️⃣ Update fields
             review.Category = dto.Category;
             review.Description = dto.Description;
             review.UpdatedAt = DateTime.UtcNow;
 
-            // 5️⃣ Save
             await _repository.UpdateAsync(review);
         }
+        #endregion
 
 
     }

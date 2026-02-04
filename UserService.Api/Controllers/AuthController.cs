@@ -14,6 +14,7 @@ namespace UserService.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        #region Configuration
         private readonly IAuthService _authService;
         private readonly IConfiguration _configuration;
 
@@ -24,7 +25,9 @@ namespace UserService.Api.Controllers
             _authService = authService;
             _configuration = configuration;
         }
+        #endregion
 
+        #region login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginUser request)
         {
@@ -50,6 +53,9 @@ namespace UserService.Api.Controllers
                 }
             });
         }
+        #endregion
+
+        #region Generate JWT Token
 
         private string GenerateJwtToken(User user)
         {
@@ -80,5 +86,26 @@ namespace UserService.Api.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        #endregion
+
+        #region register
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterUser request)
+        {
+            var user = await _authService.RegisterUserAsync(request);
+            if (user == null)
+                return BadRequest("User already exists");
+            return Ok(new
+            {
+                user = new
+                {
+                    user.UserId,
+                    user.UserName,
+                    user.Email,
+                    user.Role
+                }
+            });
+        }
+        #endregion
     }
 }

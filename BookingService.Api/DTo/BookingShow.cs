@@ -7,5 +7,7 @@
         public string ShowTime { get; set; }
         public int MovieId { get; set; }
         public int Price { get; set; }
+        public int ScreenId { get; set; }
+        public DateTime ShowDate { get; set; }
     }
 }
