@@ -108,7 +108,8 @@ namespace BookingService.Api.Services
                 ShowId = createdBooking.ShowId,
                 SeatCount = createdBooking.SeatCount,
                 Title = movie.Title,
-                ShowTime = showDetails.ShowTime
+                ShowTime = showDetails.ShowTime,
+                UserId = createdBooking.UserId
 
             };
             _logger.LogInformation($"Publishing booking confirmed event for BookingId: {eventMessage.BookingId}");
@@ -345,7 +346,8 @@ namespace BookingService.Api.Services
                 Amount = booking.TotalAmount,
                 UserName = user.UserName,
                 MoviePoster = posterBytes,
-                QrCodeImage = qrBytes
+                QrCodeImage = qrBytes,
+                SeatCount = booking.SeatCount
             };
 
 

@@ -1,4 +1,4 @@
-﻿namespace BookingService.Api.Messaging
+﻿namespace EmailService.Api.Messaging
 {
     public class BookingConfirmed
     {
@@ -7,7 +7,6 @@
         public int SeatCount { get; set; }
         public string Title { get; set; } = string.Empty;
         public string ShowTime { get; set; } = string.Empty;
-
         public int UserId { get; set; }
     }
 }

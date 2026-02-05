@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingService.Api", "Booki
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReviewService.Api", "ReviewService.Api\ReviewService.Api.csproj", "{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.Api", "EmailService.Api\EmailService.Api.csproj", "{5651E822-45E4-4672-A2B6-668EA647A160}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{544D16DF-46D2-4F65-9E1C-A3E5AFB65EB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5651E822-45E4-4672-A2B6-668EA647A160}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5651E822-45E4-4672-A2B6-668EA647A160}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5651E822-45E4-4672-A2B6-668EA647A160}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5651E822-45E4-4672-A2B6-668EA647A160}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

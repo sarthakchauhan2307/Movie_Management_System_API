@@ -6,7 +6,8 @@
         public string MovieName { get; set; }
         public string TheatreName { get; set; }
         public string Screen { get; set; }
-        public string Seats { get; set; }
+        //public string Seats { get; set; }
+        public int SeatCount { get; set; }
         public string ShowTime { get; set; }
         public decimal Amount { get; set; }
         public string UserName { get; set; }

@@ -118,7 +118,8 @@ namespace BookingService.Api.Pdf
                     new LabelValueComponent("Address", _ticket.Address));
 
                 column.Item().PaddingTop(15).Component(
-                    new LabelValueComponent("Seats", _ticket.Seats ?? "General"));
+                   new LabelValueComponent("Seats", _ticket.SeatCount.ToString()));
+
             });
         }
 
