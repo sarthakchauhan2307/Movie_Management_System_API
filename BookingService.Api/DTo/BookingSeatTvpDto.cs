@@ -2,7 +2,7 @@
 {
     public class BookingSeatTvpDto
     {
-        public int SeatNo { get; set; }
+        public string SeatNo { get; set; } = string.Empty;
         public int Price { get; set; }
 
     }

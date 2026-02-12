@@ -25,7 +25,7 @@ namespace BookingService.Api.Repository
         public async Task<Booking> CreateBookingAsync(Booking booking)
         {
             _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             return booking;
         }
         #endregion

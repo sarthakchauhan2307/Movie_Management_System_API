@@ -26,7 +26,7 @@ namespace BookingService.Api.Repository
 
             // Convert List DataTable (MUST match SQL TVP)
             var table = new DataTable();
-            table.Columns.Add("SeatNo", typeof(int));
+            table.Columns.Add("SeatNo", typeof(string));
             table.Columns.Add("Price", typeof(int));
 
             foreach (var seat in seats)
@@ -53,11 +53,11 @@ namespace BookingService.Api.Repository
         #endregion
 
         #region SeeBulkResult
-        public async Task<List<int>> GetBookedSeatsByBookingIdAsync(int bookingId)
+        public async Task<List<string>> GetBookedSeatsByBookingIdAsync(int bookingId)
         {
             using var connection = _context.CreateConnection();
 
-            var seats = await connection.QueryAsync<int>(
+            var seats = await connection.QueryAsync<string>(
                 "SELECT SeatNo FROM BookingSeats WHERE BookingId = @BookingId",
                 new { BookingId = bookingId });
 

@@ -177,5 +177,28 @@ namespace BookingService.Api.Controllers
         }
         #endregion
 
+        #region Create Booking With Seats
+        [HttpPost("create-with-seats")]
+        public async Task<IActionResult> CreateBookingWithSeats([FromBody] CreateBookingWithSeatsRequest request)
+            {
+            try
+            {
+                var bookingId =
+                    await _service.CreateBookingWithSeatsAsync(request);
+
+                return Ok(new
+                {
+                    Message = "Booking created successfully",
+                    BookingId = bookingId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        #endregion
+
+
     }
 }

@@ -174,8 +174,8 @@ namespace BookingService.Api.Services
         #region BulkBookingAsync (TVP + REAL PRICE)
         public async Task BulkBookSeatsAsync(
       int bookingId,
-      int showId,
-      List<int> seatNos)
+           int showId,
+        List<string> seatNos)
         {
             // 1️ Try locking all seats FIRST
             foreach (var seatNo in seatNos)
@@ -259,7 +259,7 @@ namespace BookingService.Api.Services
             {
                 var seats = group.Select(x => new BookingSeatTvpDto
                 {
-                    SeatNo = x.SeatNo,
+                    //SeatNo = x.SeatNo,
                     Price = x.Price
                 }).ToList();
 
@@ -275,7 +275,7 @@ namespace BookingService.Api.Services
             
 
         #region GetBookedSeatsByBookingId
-        public async Task<List<int>> GetBookedSeatsAsync(int bookingId)
+        public async Task<List<string>> GetBookedSeatsAsync(int bookingId)
         {
             return await _seatRepository.GetBookedSeatsByBookingIdAsync(bookingId);
         }
@@ -283,7 +283,7 @@ namespace BookingService.Api.Services
 
 
         #region LockSeatAsync
-        private async Task<bool> TryLockSeatsAsync(int showId, int seatNo)
+        private async Task<bool> TryLockSeatsAsync(int showId, string seatNo)
         {
             string lockKey = $"lock_show_{showId}_seat_{seatNo}";
 
@@ -364,7 +364,56 @@ namespace BookingService.Api.Services
         #endregion
 
 
+        #region CreateBookingWithSeatsAsync
+        public async Task<int> CreateBookingWithSeatsAsync(CreateBookingWithSeatsRequest request)
+        {
 
+            var showDetails = await _gateway.GetShowDetailsAsync(request.ShowId);
+
+            var totalAmount = request.SeatNos.Count * showDetails.Price;
+
+
+
+            // 1️ Create booking
+            var booking = new Booking
+            {
+                ShowId = request.ShowId,
+                UserId = request.UserId,
+                SeatCount = request.SeatNos.Count,
+                TotalAmount = totalAmount,
+                PaymentStatus = "Completed",
+                PaymentMethod = "UPI",
+                Created = DateTime.Now,
+                Modified = DateTime.Now
+            };
+            var createdBooking = await _bookingRepository.CreateBookingAsync(booking);
+
+            // Bulk insert seats
+            await BulkBookSeatsAsync(
+                   createdBooking.BookingId,
+                    request.ShowId,
+                     request.SeatNos
+             );
+            var movie = await _gateway.GetMovieAsync(showDetails.MovieId);
+
+
+            var eventMessage = new BookingConfirmed
+            {
+                BookingId = createdBooking.BookingId,
+                ShowId = createdBooking.ShowId,
+                SeatCount = createdBooking.SeatCount,
+                Title = movie.Title,
+                ShowTime = showDetails.ShowTime,
+                UserId = createdBooking.UserId
+            };
+
+            await _messageBusClient.PublishConfirmedBookingAsync(eventMessage);
+            return createdBooking.BookingId;
+
+
+
+        }
+        #endregion
 
     }
 }
