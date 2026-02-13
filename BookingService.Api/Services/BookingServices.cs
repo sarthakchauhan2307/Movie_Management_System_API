@@ -173,7 +173,7 @@ namespace BookingService.Api.Services
 
         #region BulkBookingAsync (TVP + REAL PRICE)
         public async Task BulkBookSeatsAsync(
-      int bookingId,
+             int bookingId,
            int showId,
         List<string> seatNos)
         {
@@ -323,7 +323,7 @@ namespace BookingService.Api.Services
 
             byte[] posterBytes = await _gateway.DownloadImageAsync(posterUrl);
 
-
+            var seatlist = await _seatRepository.GetBookedSeatsByBookingIdAsync(bookingId);
 
             var qrText =
               $"BOOKING:{booking.BookingId}\n" +
@@ -347,7 +347,8 @@ namespace BookingService.Api.Services
                 UserName = user.UserName,
                 MoviePoster = posterBytes,
                 QrCodeImage = qrBytes,
-                SeatCount = booking.SeatCount
+                SeatCount = booking.SeatCount,
+                SeatNos = seatlist
             };
 
 
@@ -404,7 +405,7 @@ namespace BookingService.Api.Services
                 SeatCount = createdBooking.SeatCount,
                 Title = movie.Title,
                 ShowTime = showDetails.ShowTime,
-                UserId = createdBooking.UserId
+                UserId = createdBooking.UserId,
             };
 
             await _messageBusClient.PublishConfirmedBookingAsync(eventMessage);
@@ -414,6 +415,73 @@ namespace BookingService.Api.Services
 
         }
         #endregion
+
+        #region GetMovieWiseCollectionAsync
+        public async Task<List<MovieCollectionDto>> GetMovieWiseCollectionAsync()
+        {
+            const string cacheKey = "movie_collection";
+
+            // 1️ Check Redis Cache First
+            var cachedData = await _cache.GetStringAsync(cacheKey);
+
+            if (!string.IsNullOrEmpty(cachedData))
+            {
+                return JsonSerializer.Deserialize<List<MovieCollectionDto>>(cachedData)!;
+            }
+
+            // 2️ Fetch From DB
+            var bookings = await _bookingRepository.GetCompletedBookingsAsync();
+
+            var result = new Dictionary<string, int>();
+
+            foreach (var booking in bookings)
+            {
+                try
+                {
+                    var showDetails =
+                        await _gateway.GetShowDetailsAsync(booking.ShowId);
+
+                    var movie =
+                        await _gateway.GetMovieAsync(showDetails.MovieId);
+
+                    if (movie == null)
+                        continue;
+
+                    if (result.ContainsKey(movie.Title))
+                        result[movie.Title] += booking.TotalAmount;
+                    else
+                        result[movie.Title] = booking.TotalAmount;
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            var finalResult = result.Select(kvp => new MovieCollectionDto
+            {
+                Title = kvp.Key,
+                MovieCollection = kvp.Value
+            })
+            .OrderByDescending(x => x.MovieCollection)
+            .ToList();
+
+            // 3️ Store in Redis Cache (10 min)
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+            };
+
+            await _cache.SetStringAsync(
+                cacheKey,
+                JsonSerializer.Serialize(finalResult),
+                cacheOptions
+            );
+
+            return finalResult;
+        }
+        #endregion
+
 
     }
 }

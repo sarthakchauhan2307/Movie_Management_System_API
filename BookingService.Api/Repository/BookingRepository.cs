@@ -74,6 +74,15 @@ namespace BookingService.Api.Repository
         }
         #endregion
 
+        #region GetCompletedBookingsAsync
+        public async Task<List<Booking>> GetCompletedBookingsAsync()
+        {
+            return await _context.Bookings
+                .Where(b => b.PaymentStatus == "Completed" || b.PaymentStatus == "Paid")
+                .ToListAsync();
+        }
+        #endregion
+
 
     }
 }

@@ -12,5 +12,6 @@ namespace BookingService.Api.Repository
         Task<bool> UpdateBookingAsync(Booking booking);
 
         Task<int> GetBookedSeatCountByShowAsync(int showId);
+        Task<List<Booking>> GetCompletedBookingsAsync();
     }
 }

@@ -199,6 +199,15 @@ namespace BookingService.Api.Controllers
         }
         #endregion
 
+        #region Movie Wise Collection
+        [HttpGet]
+        public async Task<IActionResult> GetMovieWiseCollection()
+        {
+            var collection = await _service.GetMovieWiseCollectionAsync();
+            return Ok(collection);
+        }
+        #endregion
+
 
     }
 }

@@ -15,6 +15,7 @@
         public DateTime ShowDate { get;set; }
         public byte[]? MoviePoster { get; set; } = null;
         public byte[]? QrCodeImage { get; set; } = null;
+        public List<string>? SeatNos { get; set; } = new();
 
     }
 }

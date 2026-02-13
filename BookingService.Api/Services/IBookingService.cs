@@ -1,4 +1,5 @@
-﻿using BookingService.Api.Models;
+﻿using BookingService.Api.DTo;
+using BookingService.Api.Models;
 
 namespace BookingService.Api.Services
 {
@@ -34,6 +35,8 @@ namespace BookingService.Api.Services
 
         byte[] GenerateTicketPdf(TicketPdfModel ticket);
         Task<int> CreateBookingWithSeatsAsync(CreateBookingWithSeatsRequest request);
+
+        Task<List<MovieCollectionDto>> GetMovieWiseCollectionAsync();
 
     }
 }

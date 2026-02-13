@@ -120,6 +120,13 @@ namespace BookingService.Api.Pdf
                 column.Item().PaddingTop(15).Component(
                    new LabelValueComponent("Seats", _ticket.SeatCount.ToString()));
 
+                column.Item().PaddingTop(15).Component(
+                          new LabelValueComponent(
+                              "Seats",
+                              string.Join(", ", _ticket.SeatNos)
+                          ));
+
+
             });
         }
 
